@@ -1,6 +1,6 @@
 {
 	"name": "workspace-version-aligner",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "CLI tool to detect and fix mismatched dependency versions in monorepos",
 	"main": "dist/index.js",
 	"bin": {
