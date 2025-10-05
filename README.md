@@ -1,6 +1,10 @@
 # Workspace Version Aligner
 
-A tool for managing package versions across monorepo workspaces.
+### A tool for managing package versions across monorepo workspaces.
+
+<p align="center">
+    <img src="./bunner.png" alt="Workspace Version Aligner Logo" width="90%"  />
+</p>
 
 ## Features
 
@@ -13,10 +17,16 @@ A tool for managing package versions across monorepo workspaces.
 ## Quick Start
 
 ```bash
-# Using bun (recommended)
+# Using bun
+
+bun run wva
 bun run align-versions
 
+or
+
 # Using npm
+
+npm run wva
 npm run align-versions
 ```
 
