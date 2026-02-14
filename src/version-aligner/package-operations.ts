@@ -1,19 +1,19 @@
-import { readFile, writeFile } from 'fs/promises';
-import { join, relative } from 'path';
-import pc from 'picocolors';
+import { readFile, writeFile } from "node:fs/promises";
+import { join, relative } from "node:path";
 import {
-	text,
-	select,
-	multiselect,
-	confirm,
-	spinner,
-	note,
 	cancel,
+	confirm,
 	isCancel,
+	multiselect,
+	note,
 	outro,
-} from '@clack/prompts';
-import { WorkspaceInfo, UpdateConfig, ChangeRecord } from './types';
-import { fetchLatestVersionSimple } from './utils';
+	select,
+	spinner,
+	text,
+} from "@clack/prompts";
+import pc from "picocolors";
+import type { UpdateConfig, WorkspaceInfo } from "./types";
+import { fetchLatestVersionSimple } from "./utils";
 
 export class PackageOperations {
 	constructor(
@@ -23,77 +23,77 @@ export class PackageOperations {
 		private getTypeIcon: (type: string) => string,
 		private hasPackage: (
 			workspace: WorkspaceInfo,
-			packageName: string
+			packageName: string,
 		) => boolean,
-		private installPackages: (targetWorkspaces: string[]) => Promise<void>
+		private installPackages: (targetWorkspaces: string[]) => Promise<void>,
 	) {}
 
 	async addOrUpdatePackage() {
 		this.displayWorkspaces();
 
 		const packageName = await text({
-			message: 'Enter package name:',
-			placeholder: 'e.g., typescript, react, lodash',
+			message: "Enter package name:",
+			placeholder: "e.g., typescript, react, lodash",
 			validate: (value) =>
-				value.length === 0 ? 'Package name is required' : undefined,
+				value.length === 0 ? "Package name is required" : undefined,
 		});
 
 		if (isCancel(packageName)) {
-			cancel('Operation cancelled');
+			cancel("Operation cancelled");
 			return;
 		}
 
 		// Fetch and display latest version info
 		const latestVersionInfo = await fetchLatestVersionSimple(
-			packageName as string
+			packageName as string,
 		);
 		if (latestVersionInfo) {
-			const latestInfo = `\n📋 Latest version on npm: ${pc.green(
-				latestVersionInfo
+			const latestInfo = `\nLatest version on npm: ${pc.green(
+				latestVersionInfo,
 			)}\n`;
-			note(latestInfo, 'NPM Registry Info');
+			note(latestInfo, "NPM Registry Info");
 		}
 
 		const version = await text({
-			message: 'Enter package version:',
-			placeholder: 'e.g., ^5.6.0, latest, ~4.0.0',
-			defaultValue: latestVersionInfo || 'latest',
+			message: "Enter package version:",
+			placeholder: "e.g., ^5.6.0, latest, ~4.0.0",
+			defaultValue: latestVersionInfo || "latest",
 		});
 
 		if (isCancel(version)) {
-			cancel('Operation cancelled');
+			cancel("Operation cancelled");
 			return;
 		}
 
 		const dependencyType = await select({
-			message: 'Select dependency type:',
+			message: "Select dependency type:",
 			options: [
-				{ value: 'devDependencies', label: '🔧 devDependencies' },
-				{ value: 'dependencies', label: '📦 dependencies' },
-				{ value: 'peerDependencies', label: '🤝 peerDependencies' },
+				{ value: "devDependencies", label: "🔧 devDependencies" },
+				{ value: "dependencies", label: " dependencies" },
+				{ value: "peerDependencies", label: "🤝 peerDependencies" },
 			],
 		});
 
 		const scopeChoice = await select({
-			message: 'Select update scope:',
+			message: "Select update scope:",
 			options: [
-				{ value: 'all', label: '🌍 All workspaces' },
-				{ value: 'byType', label: '🎯 By workspace type (apps/packages)' },
-				{ value: 'custom', label: '✨ Custom selection' },
+				{ value: "all", label: "🌍 All workspaces" },
+				{ value: "byType", label: " By workspace type (apps/packages)" },
+				{ value: "custom", label: " Custom selection" },
 			],
 		});
 
 		let targetWorkspaces: string[] = [];
 
-		if (scopeChoice === 'all') {
+		if (scopeChoice === "all") {
 			targetWorkspaces = this.workspaces.map((w) => w.path);
-		} else if (scopeChoice === 'byType') {
+		} else if (scopeChoice === "byType") {
 			const typeChoice = await multiselect({
-				message: 'Select workspace types:',
+				message: "Select workspace types:",
 				options: [
-					{ value: 'root', label: '🏠 Root workspace' },
-					{ value: 'app', label: '📱 Apps' },
-					{ value: 'package', label: '📦 Packages' },
+					{ value: "root", label: "🏠 Root workspace" },
+					{ value: "app", label: "📱 Apps" },
+					{ value: "package", label: " Packages" },
 				],
 			});
 
@@ -102,11 +102,11 @@ export class PackageOperations {
 				.map((w) => w.path);
 		} else {
 			const selectedWorkspaces = await multiselect({
-				message: 'Select specific workspaces:',
+				message: "Select specific workspaces:",
 				options: this.workspaces.map((w) => ({
 					value: w.path,
 					label: `${this.getTypeIcon(w.type)} ${w.name} ${pc.dim(
-						`(${relative(this.rootPath, w.path)})`
+						`(${relative(this.rootPath, w.path)})`,
 					)}`,
 				})),
 			});
@@ -115,14 +115,14 @@ export class PackageOperations {
 		}
 
 		const dryRun = await confirm({
-			message: 'Run in dry-run mode? (Preview changes without applying)',
+			message: "Run in dry-run mode? (Preview changes without applying)",
 			initialValue: true,
 		});
 
 		const config: UpdateConfig = {
 			packageName: packageName as string,
 			version: version as string,
-			dependencyType: dependencyType as any,
+			dependencyType: dependencyType as UpdateConfig["dependencyType"],
 			targetWorkspaces,
 			dryRun: dryRun as boolean,
 		};
@@ -136,19 +136,19 @@ export class PackageOperations {
 		// First, find all packages across workspaces
 		const allPackages = new Set<string>();
 		this.workspaces.forEach((workspace) => {
-			Object.keys(workspace.packageJson.dependencies || {}).forEach((pkg) =>
-				allPackages.add(pkg)
-			);
-			Object.keys(workspace.packageJson.devDependencies || {}).forEach((pkg) =>
-				allPackages.add(pkg)
-			);
-			Object.keys(workspace.packageJson.peerDependencies || {}).forEach((pkg) =>
-				allPackages.add(pkg)
-			);
+			Object.keys(workspace.packageJson.dependencies || {}).forEach((pkg) => {
+				allPackages.add(pkg);
+			});
+			Object.keys(workspace.packageJson.devDependencies || {}).forEach((pkg) => {
+				allPackages.add(pkg);
+			});
+			Object.keys(workspace.packageJson.peerDependencies || {}).forEach((pkg) => {
+				allPackages.add(pkg);
+			});
 		});
 
 		const packageToRemove = await select({
-			message: 'Select package to remove:',
+			message: "Select package to remove:",
 			options: Array.from(allPackages)
 				.sort()
 				.map((pkg) => ({
@@ -158,37 +158,37 @@ export class PackageOperations {
 		});
 
 		const targetWorkspaces = await multiselect({
-			message: 'Select workspaces to remove from:',
+			message: "Select workspaces to remove from:",
 			options: this.workspaces
 				.filter((w) => this.hasPackage(w, packageToRemove as string))
 				.map((w) => ({
 					value: w.path,
 					label: `${this.getTypeIcon(w.type)} ${w.name} ${pc.dim(
-						`(${relative(this.rootPath, w.path)})`
+						`(${relative(this.rootPath, w.path)})`,
 					)}`,
 				})),
 		});
 
 		const dryRun = await confirm({
-			message: 'Run in dry-run mode?',
+			message: "Run in dry-run mode?",
 			initialValue: true,
 		});
 
 		await this.executeRemoval(
 			packageToRemove as string,
 			targetWorkspaces as string[],
-			dryRun as boolean
+			dryRun as boolean,
 		);
 	}
 
 	async syncPackageVersions() {
 		const packageName = await text({
-			message: 'Enter package name to sync:',
-			placeholder: 'e.g., typescript, react',
+			message: "Enter package name to sync:",
+			placeholder: "e.g., typescript, react",
 		});
 
 		if (isCancel(packageName)) {
-			cancel('Operation cancelled');
+			cancel("Operation cancelled");
 			return;
 		}
 
@@ -204,14 +204,14 @@ export class PackageOperations {
 				if (!versions.has(version)) {
 					versions.set(version, []);
 				}
-				versions.get(version)!.push(workspace);
+				versions.get(version)?.push(workspace);
 			}
 		});
 
 		if (versions.size === 0) {
 			note(
 				`Package "${String(packageName)}" not found in any workspace`,
-				'No Package Found'
+				"No Package Found",
 			);
 			return;
 		}
@@ -221,45 +221,45 @@ export class PackageOperations {
 				`Package "${String(packageName)}" already has consistent version: ${
 					Array.from(versions.keys())[0]
 				}`,
-				'Already Synced'
+				"Already Synced",
 			);
 			return;
 		}
 
 		// Display current versions
-		let versionDisplay = '\n';
+		let versionDisplay = "\n";
 		versions.forEach((workspaces, version) => {
 			versionDisplay += pc.yellow(`Version ${version}:\n`);
 			workspaces.forEach((w) => {
-				versionDisplay += `  ${pc.gray('├─')} ${w.name}\n`;
+				versionDisplay += `  ${pc.gray("├─")} ${w.name}\n`;
 			});
-			versionDisplay += '\n';
+			versionDisplay += "\n";
 		});
 
 		note(versionDisplay, `Current versions of "${String(packageName)}"`);
 
 		const targetVersion = await select({
-			message: 'Select version to sync to:',
+			message: "Select version to sync to:",
 			options: Array.from(versions.keys()).map((version) => ({
 				value: version,
-				label: `${version} (used in ${versions.get(version)!.length} workspace${
-					versions.get(version)!.length > 1 ? 's' : ''
+				label: `${version} (used in ${versions.get(version)?.length ?? 0} workspace${
+					(versions.get(version)?.length ?? 0) > 1 ? "s" : ""
 				})`,
 			})),
 		});
 
 		if (isCancel(targetVersion)) {
-			cancel('Operation cancelled');
+			cancel("Operation cancelled");
 			return;
 		}
 
 		const dryRun = await confirm({
-			message: 'Run in dry-run mode?',
+			message: "Run in dry-run mode?",
 			initialValue: true,
 		});
 
 		if (isCancel(dryRun)) {
-			cancel('Operation cancelled');
+			cancel("Operation cancelled");
 			return;
 		}
 
@@ -273,7 +273,7 @@ export class PackageOperations {
 
 	async executeUpdate(config: UpdateConfig) {
 		const s = spinner();
-		s.start(config.dryRun ? 'Previewing changes...' : 'Updating packages...');
+		s.start(config.dryRun ? "Previewing changes..." : "Updating packages...");
 
 		const changes: Array<{
 			workspace: string;
@@ -287,9 +287,9 @@ export class PackageOperations {
 				const workspace = this.workspaces.find((w) => w.path === workspacePath);
 				if (!workspace) continue;
 
-				const packageJsonPath = join(workspacePath, 'package.json');
+				const packageJsonPath = join(workspacePath, "package.json");
 				const packageJson = JSON.parse(
-					await readFile(packageJsonPath, 'utf-8')
+					await readFile(packageJsonPath, "utf-8"),
 				);
 
 				const currentVersion =
@@ -303,7 +303,7 @@ export class PackageOperations {
 
 				changes.push({
 					workspace: workspace.name,
-					action: currentVersion ? 'update' : 'add',
+					action: currentVersion ? "update" : "add",
 					before: currentVersion,
 					after: config.version,
 				});
@@ -311,34 +311,34 @@ export class PackageOperations {
 				if (!config.dryRun) {
 					await writeFile(
 						packageJsonPath,
-						JSON.stringify(packageJson, null, 2) + '\n'
+						`${JSON.stringify(packageJson, null, 2)}\n`,
 					);
 				}
 			}
 
-			s.stop(config.dryRun ? '👀 Preview completed' : '✅ Update completed');
+			s.stop(config.dryRun ? "👀 Preview completed" : "Update completed");
 
 			// Display changes
-			let changesDisplay = '\n';
+			let changesDisplay = "\n";
 			changes.forEach((change) => {
-				const icon = change.action === 'add' ? '➕' : '📝';
+				const icon = change.action === "add" ? "➕" : "📝";
 				const action =
-					change.action === 'add'
-						? 'Added'
-						: `Updated ${pc.dim(String(change.before!))} → `;
+					change.action === "add"
+						? "Added"
+						: `Updated ${pc.dim(String(change.before ?? ""))} → `;
 				changesDisplay += `${icon} ${change.workspace}: ${action}${pc.green(
-					change.after
+					change.after,
 				)}\n`;
 			});
 
 			note(
 				changesDisplay,
-				config.dryRun ? 'Preview Changes' : 'Applied Changes'
+				config.dryRun ? "Preview Changes" : "Applied Changes",
 			);
 
 			if (config.dryRun) {
 				const apply = await confirm({
-					message: 'Apply these changes?',
+					message: "Apply these changes?",
 					initialValue: false,
 				});
 
@@ -348,7 +348,7 @@ export class PackageOperations {
 			} else {
 				// Ask if user wants to install packages after successful update
 				const shouldInstall = await confirm({
-					message: 'Install packages now? (Recommended after package changes)',
+					message: "Install packages now? (Recommended after package changes)",
 					initialValue: true,
 				});
 
@@ -356,11 +356,11 @@ export class PackageOperations {
 					await this.installPackages(config.targetWorkspaces);
 				}
 
-				outro(pc.green('✨ Package update completed successfully!'));
+				outro(pc.green(" Package update completed successfully!"));
 				process.exit(0);
 			}
 		} catch (error) {
-			s.stop('❌ Update failed');
+			s.stop("Update failed");
 			throw error;
 		}
 	}
@@ -368,40 +368,43 @@ export class PackageOperations {
 	async executeRemoval(
 		packageName: string,
 		targetWorkspaces: string[],
-		dryRun: boolean
+		dryRun: boolean,
 	) {
 		const s = spinner();
-		s.start(dryRun ? 'Previewing removals...' : 'Removing packages...');
+		s.start(dryRun ? "Previewing removals..." : "Removing packages...");
 
-		const changes: Array<{ workspace: string; type: string; version: string }> =
-			[];
+		const changes: Array<{
+			workspace: string;
+			type: string;
+			version: string;
+		}> = [];
 
 		try {
 			for (const workspacePath of targetWorkspaces) {
 				const workspace = this.workspaces.find((w) => w.path === workspacePath);
 				if (!workspace) continue;
 
-				const packageJsonPath = join(workspacePath, 'package.json');
+				const packageJsonPath = join(workspacePath, "package.json");
 				const packageJson = JSON.parse(
-					await readFile(packageJsonPath, 'utf-8')
+					await readFile(packageJsonPath, "utf-8"),
 				);
 
 				// Remove from all dependency types
-				let removedFrom = '';
-				let version = '';
+				let removedFrom = "";
+				let version = "";
 
 				if (packageJson.dependencies?.[packageName]) {
 					version = packageJson.dependencies[packageName];
 					if (!dryRun) delete packageJson.dependencies[packageName];
-					removedFrom = 'dependencies';
+					removedFrom = "dependencies";
 				} else if (packageJson.devDependencies?.[packageName]) {
 					version = packageJson.devDependencies[packageName];
 					if (!dryRun) delete packageJson.devDependencies[packageName];
-					removedFrom = 'devDependencies';
+					removedFrom = "devDependencies";
 				} else if (packageJson.peerDependencies?.[packageName]) {
 					version = packageJson.peerDependencies[packageName];
 					if (!dryRun) delete packageJson.peerDependencies[packageName];
-					removedFrom = 'peerDependencies';
+					removedFrom = "peerDependencies";
 				}
 
 				if (removedFrom) {
@@ -414,27 +417,27 @@ export class PackageOperations {
 					if (!dryRun) {
 						await writeFile(
 							packageJsonPath,
-							JSON.stringify(packageJson, null, 2) + '\n'
+							`${JSON.stringify(packageJson, null, 2)}\n`,
 						);
 					}
 				}
 			}
 
-			s.stop(dryRun ? '👀 Preview completed' : '✅ Removal completed');
+			s.stop(dryRun ? "👀 Preview completed" : "Removal completed");
 
 			// Display changes
-			let changesDisplay = '\n';
+			let changesDisplay = "\n";
 			changes.forEach((change) => {
 				changesDisplay += `🗑️  ${change.workspace}: Removed from ${
 					change.type
 				} ${pc.dim(`(${change.version})`)}\n`;
 			});
 
-			note(changesDisplay, dryRun ? 'Preview Removals' : 'Applied Removals');
+			note(changesDisplay, dryRun ? "Preview Removals" : "Applied Removals");
 
 			if (dryRun) {
 				const apply = await confirm({
-					message: 'Apply these changes?',
+					message: "Apply these changes?",
 					initialValue: false,
 				});
 
@@ -444,7 +447,7 @@ export class PackageOperations {
 			} else {
 				// Ask if user wants to install packages after successful removal
 				const shouldInstall = await confirm({
-					message: 'Install packages now? (Recommended after package changes)',
+					message: "Install packages now? (Recommended after package changes)",
 					initialValue: true,
 				});
 
@@ -452,11 +455,11 @@ export class PackageOperations {
 					await this.installPackages(targetWorkspaces);
 				}
 
-				outro(pc.green('✨ Package removal completed successfully!'));
+				outro(pc.green(" Package removal completed successfully!"));
 				process.exit(0);
 			}
 		} catch (error) {
-			s.stop('❌ Removal failed');
+			s.stop("Removal failed");
 			throw error;
 		}
 	}

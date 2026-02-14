@@ -1,9 +1,9 @@
-import { readdir, readFile } from 'fs/promises';
-import { join, relative } from 'path';
-import { existsSync } from 'fs';
-import pc from 'picocolors';
-import { spinner, note } from '@clack/prompts';
-import { WorkspaceInfo, PackageJson } from './types';
+import { existsSync } from "node:fs";
+import { readdir, readFile } from "node:fs/promises";
+import { join, relative } from "node:path";
+import { note, spinner } from "@clack/prompts";
+import pc from "picocolors";
+import type { WorkspaceInfo } from "./types";
 
 export class WorkspaceManager {
 	private workspaces: WorkspaceInfo[] = [];
@@ -12,38 +12,38 @@ export class WorkspaceManager {
 
 	async scanWorkspaces(): Promise<WorkspaceInfo[]> {
 		const s = spinner();
-		s.start('🔍 Scanning workspace for package.json files...');
+		s.start(" Scanning workspace for package.json files...");
 
 		try {
 			// Add root workspace
-			const rootPackageJsonPath = join(this.rootPath, 'package.json');
+			const rootPackageJsonPath = join(this.rootPath, "package.json");
 			if (existsSync(rootPackageJsonPath)) {
 				const rootPackageJson = JSON.parse(
-					await readFile(rootPackageJsonPath, 'utf-8')
+					await readFile(rootPackageJsonPath, "utf-8"),
 				);
 				this.workspaces.push({
 					path: this.rootPath,
-					name: rootPackageJson.name || 'root',
-					type: 'root',
+					name: rootPackageJson.name || "root",
+					type: "root",
 					packageJson: rootPackageJson,
 				});
 			}
 
 			// Scan apps
-			const appsPath = join(this.rootPath, 'apps');
+			const appsPath = join(this.rootPath, "apps");
 			if (existsSync(appsPath)) {
 				const apps = await readdir(appsPath);
 				for (const app of apps) {
 					const appPath = join(appsPath, app);
-					const packageJsonPath = join(appPath, 'package.json');
+					const packageJsonPath = join(appPath, "package.json");
 					if (existsSync(packageJsonPath)) {
 						const packageJson = JSON.parse(
-							await readFile(packageJsonPath, 'utf-8')
+							await readFile(packageJsonPath, "utf-8"),
 						);
 						this.workspaces.push({
 							path: appPath,
 							name: packageJson.name || app,
-							type: 'app',
+							type: "app",
 							packageJson,
 						});
 					}
@@ -51,57 +51,60 @@ export class WorkspaceManager {
 			}
 
 			// Scan packages
-			const packagesPath = join(this.rootPath, 'packages');
+			const packagesPath = join(this.rootPath, "packages");
 			if (existsSync(packagesPath)) {
 				const packages = await readdir(packagesPath);
 				for (const pkg of packages) {
 					const pkgPath = join(packagesPath, pkg);
-					const packageJsonPath = join(pkgPath, 'package.json');
+					const packageJsonPath = join(pkgPath, "package.json");
 					if (existsSync(packageJsonPath)) {
 						const packageJson = JSON.parse(
-							await readFile(packageJsonPath, 'utf-8')
+							await readFile(packageJsonPath, "utf-8"),
 						);
 						this.workspaces.push({
 							path: pkgPath,
 							name: packageJson.name || pkg,
-							type: 'package',
+							type: "package",
 							packageJson,
 						});
 					}
 				}
 			}
 
-			s.stop(`✅ Found ${this.workspaces.length} workspaces`);
+			s.stop(`Found ${this.workspaces.length} workspaces`);
 			return this.workspaces;
 		} catch (error) {
-			s.stop('❌ Failed to scan workspaces');
+			s.stop("Failed to scan workspaces");
 			throw error;
 		}
 	}
 
 	displayWorkspaces() {
-		const workspacesByType = this.workspaces.reduce((acc, workspace) => {
-			if (!acc[workspace.type]) acc[workspace.type] = [];
-			acc[workspace.type].push(workspace);
-			return acc;
-		}, {} as Record<string, WorkspaceInfo[]>);
+		const workspacesByType = this.workspaces.reduce(
+			(acc, workspace) => {
+				if (!acc[workspace.type]) acc[workspace.type] = [];
+				acc[workspace.type].push(workspace);
+				return acc;
+			},
+			{} as Record<string, WorkspaceInfo[]>,
+		);
 
-		let display = '\n';
+		let display = "\n";
 
 		Object.entries(workspacesByType).forEach(([type, workspaces]) => {
-			const typeIcon = type === 'app' ? '📱' : type === 'package' ? '📦' : '🏠';
+			const typeIcon = type === "app" ? "📱" : type === "package" ? "" : "🏠";
 			display += pc.bold(pc.cyan(`${typeIcon} ${type.toUpperCase()}S:\n`));
 
 			workspaces.forEach((workspace) => {
 				const relativePath = relative(this.rootPath, workspace.path);
-				display += `  ${pc.gray('├─')} ${pc.white(workspace.name)} ${pc.dim(
-					`(${relativePath})\n`
+				display += `  ${pc.gray("├─")} ${pc.white(workspace.name)} ${pc.dim(
+					`(${relativePath})\n`,
 				)}`;
 			});
-			display += '\n';
+			display += "\n";
 		});
 
-		note(display, 'Available Workspaces');
+		note(display, "Available Workspaces");
 	}
 
 	getWorkspaces(): WorkspaceInfo[] {
@@ -116,7 +119,7 @@ export class WorkspaceManager {
 		return this.workspaces.find((w) => w.name === name);
 	}
 
-	getWorkspacesByType(type: 'app' | 'package' | 'root'): WorkspaceInfo[] {
+	getWorkspacesByType(type: "app" | "package" | "root"): WorkspaceInfo[] {
 		return this.workspaces.filter((w) => w.type === type);
 	}
 
@@ -135,11 +138,15 @@ export class WorkspaceManager {
 					packageMap.set(packageName, new Map());
 				}
 
-				const versionMap = packageMap.get(packageName)!;
+				const versionMap = packageMap.get(packageName);
+				if (!versionMap) {
+					// Should not happen as we just set it if missing
+					return;
+				}
 				if (!versionMap.has(version)) {
 					versionMap.set(version, []);
 				}
-				versionMap.get(version)!.push(workspace);
+				versionMap.get(version)?.push(workspace);
 			});
 		});
 
