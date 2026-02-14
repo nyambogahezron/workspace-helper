@@ -1,14 +1,14 @@
-import pc from 'picocolors';
-import { relative } from 'path';
-import { note } from '@clack/prompts';
-import { WorkspaceInfo } from './types';
-import { groupWorkspacesByLocation, detectPackageManager } from './utils';
+import { relative } from "node:path";
+import { note } from "@clack/prompts";
+import pc from "picocolors";
+import type { WorkspaceInfo } from "./types";
+import { detectPackageManager, groupWorkspacesByLocation } from "./utils";
 
 export class UIHelpers {
 	constructor(private rootPath: string) {}
 
 	getTypeIcon(type: string): string {
-		return type === 'app' ? '📱' : type === 'package' ? '📦' : '🏠';
+		return type === "app" ? "📱" : type === "package" ? "" : "🏠";
 	}
 
 	hasPackage(workspace: WorkspaceInfo, packageName: string): boolean {
@@ -24,51 +24,51 @@ export class UIHelpers {
 		const packageManager = await detectPackageManager();
 		const installCommand = packageManager;
 
-		let instructions = '\n';
-		instructions += pc.yellow('📋 Manual Installation Instructions:\n\n');
+		let instructions = "\n";
+		instructions += pc.yellow("Manual Installation Instructions:\n\n");
 		instructions += pc.gray(
-			'Run the following commands to install packages manually:\n\n'
+			"Run the following commands to install packages manually:\n\n",
 		);
 
 		const groups = await groupWorkspacesByLocation(
 			targetWorkspaces,
-			this.rootPath
+			this.rootPath,
 		);
 
 		groups.forEach(({ path }) => {
 			const relativePath = relative(this.rootPath, path);
-			instructions += pc.cyan(`📁 ${relativePath || 'root'}:\n`);
-			instructions += pc.gray(`   cd ${relativePath || '.'}\n`);
+			instructions += pc.cyan(`📁 ${relativePath || "root"}:\n`);
+			instructions += pc.gray(`   cd ${relativePath || "."}\n`);
 			instructions += pc.green(`   ${installCommand}\n\n`);
 		});
 
-		note(instructions, 'Manual Installation');
+		note(instructions, "Manual Installation");
 	}
 
 	displayPackageList(packageMap: Record<string, Map<string, WorkspaceInfo[]>>) {
-		let display = '\n';
+		let display = "\n";
 
 		Object.entries(packageMap)
 			.sort(([a], [b]) => a.localeCompare(b))
 			.forEach(([packageName, versionMap]) => {
-				display += pc.bold(pc.cyan(`📦 ${packageName}\n`));
+				display += pc.bold(pc.cyan(` ${packageName}\n`));
 
 				Array.from(versionMap.entries())
 					.sort(([a], [b]) => a.localeCompare(b))
 					.forEach(([version, workspaces]) => {
 						display += `  ${pc.yellow(version)} ${pc.dim(
 							`(${workspaces.length} workspace${
-								workspaces.length > 1 ? 's' : ''
-							})\n`
+								workspaces.length > 1 ? "s" : ""
+							})\n`,
 						)}`;
 						workspaces.forEach((workspace) => {
-							display += `    ${pc.gray('├─')} ${workspace.name}\n`;
+							display += `    ${pc.gray("├─")} ${workspace.name}\n`;
 						});
 					});
-				display += '\n';
+				display += "\n";
 			});
 
-		note(display, 'All Packages');
+		note(display, "All Packages");
 	}
 
 	formatVersionChange(before: string, after: string): string {
@@ -78,7 +78,7 @@ export class UIHelpers {
 	formatWorkspacePath(workspace: WorkspaceInfo): string {
 		const relativePath = relative(this.rootPath, workspace.path);
 		return `${this.getTypeIcon(workspace.type)} ${workspace.name} ${pc.dim(
-			`(${relativePath})`
+			`(${relativePath})`,
 		)}`;
 	}
 }

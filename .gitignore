@@ -1,6 +1,7 @@
-/node_modules
-/dist
-/build
+node_modules/
+dist/
+bin/
+build/
 /coverage
 /logs
 /temp

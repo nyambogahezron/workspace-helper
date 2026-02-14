@@ -1,25 +1,24 @@
 #!/usr/bin/env bun
 
+import { readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import {
+	cancel,
+	confirm,
 	intro,
+	isCancel,
+	note,
 	outro,
 	select,
-	confirm,
 	spinner,
-	note,
-	cancel,
-	isCancel,
-} from '@clack/prompts';
-import { readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
-import pc from 'picocolors';
-
-import { WorkspaceInfo, ChangeRecord } from './src/types';
-import { WorkspaceManager } from './src/workspace';
-import { PackageOperations } from './src/package-operations';
-import { ConflictResolver } from './src/conflict-resolver';
-import { UIHelpers } from './src/ui';
-import { groupWorkspacesByLocation, detectPackageManager } from './src/utils';
+} from "@clack/prompts";
+import pc from "picocolors";
+import { ConflictResolver } from "./conflict-resolver";
+import { PackageOperations } from "./package-operations";
+import type { WorkspaceInfo } from "./types";
+import { UIHelpers } from "./ui";
+import { detectPackageManager, groupWorkspacesByLocation } from "./utils";
+import { WorkspaceManager } from "./workspace-manager";
 
 class PackageUpdater {
 	private workspaceManager: WorkspaceManager;
@@ -32,13 +31,13 @@ class PackageUpdater {
 		this.ui = new UIHelpers(rootPath);
 
 		// These will be initialized after workspace scanning
-		this.packageOps = null as any;
-		this.conflictResolver = null as any;
+		this.packageOps = null as unknown as PackageOperations;
+		this.conflictResolver = null as unknown as ConflictResolver;
 	}
 
 	async init() {
 		console.clear();
-		intro(pc.bold(pc.cyan('📦 Package Updater')));
+		intro(pc.bold(pc.cyan(" Package Updater")));
 
 		await this.workspaceManager.scanWorkspaces();
 		const workspaces = this.workspaceManager.getWorkspaces();
@@ -51,7 +50,7 @@ class PackageUpdater {
 			(type: string) => this.ui.getTypeIcon(type),
 			(workspace: WorkspaceInfo, packageName: string) =>
 				this.ui.hasPackage(workspace, packageName),
-			(targetWorkspaces: string[]) => this.installPackages(targetWorkspaces)
+			(targetWorkspaces: string[]) => this.installPackages(targetWorkspaces),
 		);
 
 		this.conflictResolver = new ConflictResolver(
@@ -61,74 +60,75 @@ class PackageUpdater {
 				targetVersion: string,
 				versions: Map<string, WorkspaceInfo[]>,
 				dryRun: boolean,
-				suppressExit?: boolean
+				suppressExit?: boolean,
 			) =>
 				this.executeSyncVersions(
 					packageName,
 					targetVersion,
 					versions,
 					dryRun,
-					suppressExit
+					suppressExit,
 				),
-			(targetWorkspaces: string[]) => this.installPackages(targetWorkspaces)
+			(targetWorkspaces: string[]) => this.installPackages(targetWorkspaces),
 		);
 	}
 
 	async run() {
 		try {
 			const action = await select({
-				message: 'What would you like to do?',
+				message: "What would you like to do?",
 				options: [
-					{ value: 'add', label: '➕ Add or update package' },
-					{ value: 'remove', label: '🗑️  Remove package' },
-					{ value: 'sync', label: '🔄 Sync package versions' },
+					{ value: "add", label: "Add or update package" },
+					{ value: "remove", label: "Remove package" },
+					{ value: "sync", label: "Sync package versions" },
 					{
-						value: 'conflicts',
-						label: '⚠️  Find and resolve version conflicts',
+						value: "conflicts",
+						label: "Find and resolve version conflicts",
 					},
-					{ value: 'list', label: '📋 List all packages' },
+					{ value: "list", label: "List all packages" },
 					{
-						value: 'install',
-						label: '🚀 Install packages (run package manager)',
+						value: "install",
+						label: "Install packages (run package manager)",
 					},
 				],
 			});
 
 			if (isCancel(action)) {
-				cancel('Operation cancelled');
+				cancel("Operation cancelled");
 				return;
 			}
 
 			switch (action) {
-				case 'add':
+				case "add":
 					await this.packageOps.addOrUpdatePackage();
 					break;
-				case 'remove':
+				case "remove":
 					await this.packageOps.removePackage();
 					break;
-				case 'sync':
+				case "sync": {
 					const syncResult = await this.packageOps.syncPackageVersions();
 					if (syncResult) {
 						await this.executeSyncVersions(
 							syncResult.packageName,
 							syncResult.targetVersion,
 							syncResult.versions,
-							syncResult.dryRun
+							syncResult.dryRun,
 						);
 					}
 					break;
-				case 'conflicts':
+				}
+				case "conflicts":
 					await this.conflictResolver.findAndResolveConflicts();
 					break;
-				case 'list':
+				case "list":
 					await this.listPackages();
 					break;
-				case 'install':
+				case "install":
 					await this.showInstallPrompt();
 					break;
 			}
 		} catch (error) {
-			outro(pc.red('❌ An error occurred: ' + (error as Error).message));
+			outro(pc.red(`An error occurred: ${(error as Error).message}`));
 			process.exit(1);
 		}
 	}
@@ -143,7 +143,7 @@ class PackageUpdater {
 
 		const confirmInstall = await confirm({
 			message:
-				'Install packages for all workspaces? (This will run the package manager)',
+				"Install packages for all workspaces? (This will run the package manager)",
 			initialValue: true,
 		});
 
@@ -152,7 +152,7 @@ class PackageUpdater {
 				.getWorkspaces()
 				.map((w) => w.path);
 			await this.installPackages(allWorkspaces);
-			outro(pc.green('✨ Package installation completed successfully!'));
+			outro(pc.green(" Package installation completed successfully!"));
 		}
 	}
 
@@ -161,10 +161,10 @@ class PackageUpdater {
 		targetVersion: string,
 		versions: Map<string, WorkspaceInfo[]>,
 		dryRun: boolean,
-		suppressExit?: boolean
+		suppressExit?: boolean,
 	) {
 		const s = spinner();
-		s.start(dryRun ? 'Previewing sync...' : 'Syncing versions...');
+		s.start(dryRun ? "Previewing sync..." : "Syncing versions...");
 
 		const changes: Array<{
 			workspace: string;
@@ -178,21 +178,21 @@ class PackageUpdater {
 				if (version === targetVersion) continue;
 
 				for (const workspace of workspaces) {
-					const packageJsonPath = join(workspace.path, 'package.json');
+					const packageJsonPath = join(workspace.path, "package.json");
 					const packageJson = JSON.parse(
-						await readFile(packageJsonPath, 'utf-8')
+						await readFile(packageJsonPath, "utf-8"),
 					);
 
-					let depType = '';
+					let depType = "";
 					if (packageJson.dependencies?.[packageName]) {
-						depType = 'dependencies';
+						depType = "dependencies";
 						if (!dryRun) packageJson.dependencies[packageName] = targetVersion;
 					} else if (packageJson.devDependencies?.[packageName]) {
-						depType = 'devDependencies';
+						depType = "devDependencies";
 						if (!dryRun)
 							packageJson.devDependencies[packageName] = targetVersion;
 					} else if (packageJson.peerDependencies?.[packageName]) {
-						depType = 'peerDependencies';
+						depType = "peerDependencies";
 						if (!dryRun)
 							packageJson.peerDependencies[packageName] = targetVersion;
 					}
@@ -207,28 +207,28 @@ class PackageUpdater {
 					if (!dryRun) {
 						await writeFile(
 							packageJsonPath,
-							JSON.stringify(packageJson, null, 2) + '\n'
+							`${JSON.stringify(packageJson, null, 2)}\n`,
 						);
 					}
 				}
 			}
 
-			s.stop(dryRun ? '👀 Preview completed' : '✅ Sync completed');
+			s.stop(dryRun ? "👀 Preview completed" : "Sync completed");
 
-			let changesDisplay = '\n';
+			let changesDisplay = "\n";
 			changes.forEach((change) => {
 				changesDisplay += `🔄 ${change.workspace}: ${pc.dim(
-					String(change.before)
+					String(change.before),
 				)} → ${pc.green(String(change.after))} ${pc.gray(
-					`(${change.type})`
+					`(${change.type})`,
 				)}\n`;
 			});
 
-			note(changesDisplay, dryRun ? 'Preview Sync' : 'Applied Sync');
+			note(changesDisplay, dryRun ? "Preview Sync" : "Applied Sync");
 
 			if (dryRun) {
 				const apply = await confirm({
-					message: 'Apply these changes?',
+					message: "Apply these changes?",
 					initialValue: false,
 				});
 				if (apply) {
@@ -237,7 +237,7 @@ class PackageUpdater {
 						targetVersion,
 						versions,
 						false,
-						suppressExit
+						suppressExit,
 					);
 				}
 			} else {
@@ -245,7 +245,7 @@ class PackageUpdater {
 					// Ask if user wants to install packages after successful sync
 					const shouldInstall = await confirm({
 						message:
-							'Install packages now? (Recommended after version changes)',
+							"Install packages now? (Recommended after version changes)",
 						initialValue: true,
 					});
 					if (shouldInstall) {
@@ -254,19 +254,19 @@ class PackageUpdater {
 							.map((w) => w.path);
 						await this.installPackages(allWorkspaces);
 					}
-					outro(pc.green('✨ Version sync completed successfully!'));
+					outro(pc.green(" Version sync completed successfully!"));
 					process.exit(0);
 				}
 			}
 		} catch (error) {
-			s.stop('❌ Sync failed');
+			s.stop("Sync failed");
 			throw error;
 		}
 	}
 
 	private async installPackages(targetWorkspaces: string[]) {
 		const s = spinner();
-		s.start('📦 Installing packages...');
+		s.start(" Installing packages...");
 
 		try {
 			// Check if we're in a workspace with package manager preference
@@ -275,11 +275,11 @@ class PackageUpdater {
 			// Group workspaces by their location for more efficient installation
 			const workspaceGroups = await groupWorkspacesByLocation(
 				targetWorkspaces,
-				this.rootPath
+				this.rootPath,
 			);
 
-			for (const { path, workspaces } of workspaceGroups) {
-				const { spawn } = await import('child_process');
+			for (const { path } of workspaceGroups) {
+				const { spawn } = await import("node:child_process");
 
 				const installCommand = this.getInstallCommand(packageManager);
 				const [command, ...args] = installCommand;
@@ -289,28 +289,28 @@ class PackageUpdater {
 				await new Promise<void>((resolve, reject) => {
 					const installProcess = spawn(command, args, {
 						cwd: path,
-						stdio: ['inherit', 'pipe', 'pipe'],
+						stdio: ["inherit", "pipe", "pipe"],
 					});
 
-					let stdout = '';
-					let stderr = '';
+					let _stdout = "";
+					let stderr = "";
 
-					installProcess.stdout?.on('data', (data) => {
-						stdout += data.toString();
+					installProcess.stdout?.on("data", (data) => {
+						_stdout += data.toString();
 					});
 
-					installProcess.stderr?.on('data', (data) => {
+					installProcess.stderr?.on("data", (data) => {
 						stderr += data.toString();
 					});
 
-					installProcess.on('close', (code) => {
+					installProcess.on("close", (code) => {
 						if (code === 0) {
 							resolve();
 						} else {
 							reject(
 								new Error(
-									`Installation failed in ${path}: ${stderr || 'Unknown error'}`
-								)
+									`Installation failed in ${path}: ${stderr || "Unknown error"}`,
+								),
 							);
 						}
 					});
@@ -318,14 +318,14 @@ class PackageUpdater {
 					// Timeout after 5 minutes
 					setTimeout(() => {
 						installProcess.kill();
-						reject(new Error('Installation timeout'));
+						reject(new Error("Installation timeout"));
 					}, 300000);
 				});
 			}
 
-			s.stop('✅ Installation completed');
+			s.stop("Installation completed");
 		} catch (error) {
-			s.stop('❌ Installation failed');
+			s.stop("Installation failed");
 			// Show manual installation instructions as fallback
 			await this.ui.showManualInstallInstructions(targetWorkspaces);
 			throw error;
@@ -333,10 +333,10 @@ class PackageUpdater {
 	}
 
 	private getInstallCommand(packageManager: string): string[] {
-		if (packageManager.includes('pnpm')) return ['pnpm', 'install'];
-		if (packageManager.includes('yarn')) return ['yarn'];
-		if (packageManager.includes('bun')) return ['bun', 'install'];
-		return ['npm', 'install'];
+		if (packageManager.includes("pnpm")) return ["pnpm", "install"];
+		if (packageManager.includes("yarn")) return ["yarn"];
+		if (packageManager.includes("bun")) return ["bun", "install"];
+		return ["npm", "install"];
 	}
 }
 
