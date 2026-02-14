@@ -1,0 +1,21 @@
+{
+	"name": "workspace-version-aligner",
+	"version": "1.0.2",
+	"description": "CLI tool to detect and fix mismatched dependency versions in monorepos",
+	"main": "dist/index.js",
+	"bin": {
+		"align-versions": "dist/index.js",
+		"wva": "dist/index.js"
+	},
+	"scripts": {
+		"build": "tsc"
+	},
+	"dependencies": {
+		"@clack/prompts": "^0.11.0",
+		"picocolors": "^1.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "^24.0.14",
+		"typescript": "^5.8.3"
+	}
+}

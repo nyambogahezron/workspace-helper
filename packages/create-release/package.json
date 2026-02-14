@@ -1,0 +1,13 @@
+{
+	"name": "@workspace-version-aligner/create-release",
+	"version": "0.0.1",
+	"description": "Tool to automate release creation",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "tsc"
+	},
+	"devDependencies": {
+		"@types/node": "^24.0.14",
+		"typescript": "^5.8.3"
+	}
+}

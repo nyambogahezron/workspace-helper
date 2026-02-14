@@ -1,39 +1,21 @@
 {
-	"name": "workspace-version-aligner",
-	"version": "1.0.2",
-	"description": "CLI tool to detect and fix mismatched dependency versions in monorepos",
-	"main": "dist/index.js",
-	"bin": {
-		"align-versions": "dist/index.js",
-		"wva": "dist/index.js"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/nyambogahezron/workspace-version-aligner.git"
-	},
-	"keywords": [
-		"monorepo",
-		"dependency",
-		"version",
-		"align",
-		"cli"
+	"name": "root",
+	"private": true,
+	"workspaces": [
+		"packages/*"
 	],
-	"bugs": {
-		"url": "https://github.com/nyambogahezron/workspace-version-aligner/issues"
-	},
-	"homepage": "https://github.com/nyambogahezron/workspace-version-aligner#readme",
-	"author": "Nyamboga Hezron",
-	"license": "MIT",
-	"dependencies": {
-		"@clack/prompts": "^0.11.0",
-		"fs": "^0.0.1-security",
-		"path": "^0.12.7"
-	},
 	"scripts": {
-		"build": "tsc"
+		"build": "bun run --filter './packages/*' build",
+		"test": "jest",
+		"wva": "lerna run wva",
+		"align-versions": "lerna run align-versions"
 	},
 	"devDependencies": {
-		"@types/node": "^24.0.14",
+		"@biomejs/biome": "2.3.15",
+		"@types/jest": "^30.0.0",
+		"jest": "^30.2.0",
+		"lerna": "^9.0.4",
+		"ts-jest": "^29.4.6",
 		"typescript": "^5.8.3"
 	}
 }
