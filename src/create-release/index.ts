@@ -1,5 +1,4 @@
 class CreateRelease {
-
 	async init() {
 		console.log("CreateRelease init");
 	}
