@@ -139,12 +139,16 @@ export class PackageOperations {
 			Object.keys(workspace.packageJson.dependencies || {}).forEach((pkg) => {
 				allPackages.add(pkg);
 			});
-			Object.keys(workspace.packageJson.devDependencies || {}).forEach((pkg) => {
-				allPackages.add(pkg);
-			});
-			Object.keys(workspace.packageJson.peerDependencies || {}).forEach((pkg) => {
-				allPackages.add(pkg);
-			});
+			Object.keys(workspace.packageJson.devDependencies || {}).forEach(
+				(pkg) => {
+					allPackages.add(pkg);
+				},
+			);
+			Object.keys(workspace.packageJson.peerDependencies || {}).forEach(
+				(pkg) => {
+					allPackages.add(pkg);
+				},
+			);
 		});
 
 		const packageToRemove = await select({

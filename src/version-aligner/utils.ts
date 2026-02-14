@@ -72,8 +72,7 @@ export async function groupWorkspacesByLocation(
 					workspaces,
 				}));
 			}
-		} catch (_error) {
-		}
+		} catch (_error) {}
 	}
 
 	targetWorkspaces.forEach((workspace) => {
