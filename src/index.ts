@@ -9,7 +9,7 @@ async function main() {
 	const command = await select({
 		message: "Choose a command:",
 		options: [
-			{ value: "create-release", label: "Create Release" },
+			{ value: "manage-release", label: "Manage Releases" },
 			{ value: "align-versions", label: "Align Versions" },
 		],
 	});
@@ -19,7 +19,7 @@ async function main() {
 		process.exit(0);
 	}
 
-	if (command === "create-release") {
+	if (command === "manage-release") {
 		await CreateRelease();
 	} else if (command === "align-versions") {
 		const alignVersions = new AlignVersions();
