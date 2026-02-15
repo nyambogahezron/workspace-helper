@@ -1,8 +1,8 @@
-# Workspace Version Aligner
+# Workspace Helper
 
 > Keep package versions in sync across your monorepo.
 
-`workspace-version-aligner` is a powerful CLI tool designed to help you manage dependencies in a monorepo environment. It ensures that your internal and external package versions are consistent across all your workspaces, preventing version mismatch errors and ensuring a stable build environment.
+`workspace-helper` is a powerful CLI tool designed to help you manage dependencies in a monorepo environment. It ensures that your internal and external package versions are consistent across all your workspaces, preventing version mismatch errors and ensuring a stable build environment.
 
 ## Features
 

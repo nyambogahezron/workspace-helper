@@ -1,15 +1,19 @@
 {
-	"name": "workspace-version-aligner",
+	"name": "workspace-helper",
+	"version": "1.0.3",
 	"private": true,
 	"scripts": {
-		"build": "bun build ./src/version-aligner/index.ts --outdir ./dist --target=bun",
-		"start": "bun run ./src/version-aligner/index.ts",
+		"build": "bun build ./src/workspace-helper/index.ts --outdir ./dist --target=bun",
+		"start": "bun run ./src/workspace-helper/index.ts",
 		"format": "biome format --write .",
 		"lint": "biome lint --write .",
 		"prepare": "husky"
 	},
 	"bin": {
-		"wva": "./src/version-aligner/index.ts"
+		"wh": "./src/workspace-helper/index.ts",
+		"workspace-helper": "./src/workspace-helper/index.ts",
+		"wva": "./src/workspace-helper/index.ts",
+		"align-versions": "./src/workspace-helper/index.ts"
 	},
 	"dependencies": {
 		"@clack/prompts": "^0.7.0",

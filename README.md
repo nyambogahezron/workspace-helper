@@ -1,9 +1,9 @@
-# Workspace Version Aligner
+# Workspace Helper
 
 A tool for managing package versions across monorepo workspaces.
 
-[![npm version](https://img.shields.io/npm/v/workspace-version-aligner.svg)](https://npmjs.org/package/workspace-version-aligner)
-[![License](https://img.shields.io/npm/l/workspace-version-aligner.svg)](https://github.com/nyambogahezron/workspace-version-aligner/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/workspace-helper.svg?label=version&message=1.0.3)](https://npmjs.org/package/workspace-helper)
+[![License](https://img.shields.io/npm/l/workspace-helper.svg)](https://github.com/nyambogahezron/workspace-helper/blob/main/LICENSE)
 
 - [Installation](#installation)
 - [Usage](#usage)
@@ -11,36 +11,36 @@ A tool for managing package versions across monorepo workspaces.
 
 # Installation
 
-You can run `workspace-version-aligner` directly using `bun` or `npx`, or install it globally.
+You can run `workspace-helper` directly using `bun` or `npx`, or install it globally.
 
 ```sh
 # Using bun (recommended)
-bun x workspace-version-aligner
+bun x workspace-helper
 
 # Using npx
-npx workspace-version-aligner
+npx workspace-helper
 ```
 
 To install globally:
 
 ```sh
-bun add -g workspace-version-aligner
+bun add -g workspace-helper
 # or
-npm install -g workspace-version-aligner
+npm install -g workspace-helper
 ```
 
 Then run:
 
 ```sh
-wva
+wh
 ```
 
 # Usage
 
-`workspace-version-aligner` is primarily an interactive CLI tool. When you run it, you will be presented with a menu to select the operation you want to perform.
+`workspace-helper` is primarily an interactive CLI tool. When you run it, you will be presented with a menu to select the operation you want to perform.
 
 ```sh
-wva
+wh
 ```
 
 # Interactive Commands
