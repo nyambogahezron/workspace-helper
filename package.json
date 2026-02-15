@@ -3,21 +3,21 @@
 	"version": "1.0.3",
 	"private": true,
 	"scripts": {
-		"build": "bun build ./src/workspace-helper/index.ts --outdir ./dist --target=bun",
-		"start": "bun run ./src/workspace-helper/index.ts",
+		"build": "bun build ./src/index.ts --outdir ./dist --target=bun",
+		"start": "bun run ./src/index.ts",
 		"format": "biome format --write .",
 		"lint": "biome lint --write .",
 		"prepare": "husky"
 	},
 	"bin": {
-		"wh": "./src/workspace-helper/index.ts",
-		"workspace-helper": "./src/workspace-helper/index.ts",
-		"wva": "./src/workspace-helper/index.ts",
-		"align-versions": "./src/workspace-helper/index.ts"
+		"wh": "./src/index.ts",
+		"workspace-helper": "./src/index.ts",
+		"wva": "./src/index.ts",
+		"align-versions": "./src/index.ts"
 	},
 	"dependencies": {
 		"@clack/prompts": "^0.7.0",
-		"picocolors": "^1.0.0"
+		"picocolors": "^1.1.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.15",

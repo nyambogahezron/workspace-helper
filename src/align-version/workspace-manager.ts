@@ -3,7 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { note, spinner } from "@clack/prompts";
 import pc from "picocolors";
-import type { WorkspaceInfo } from "./types";
+import type { WorkspaceInfo } from "../types";
 
 export class WorkspaceManager {
 	private workspaces: WorkspaceInfo[] = [];
@@ -92,7 +92,8 @@ export class WorkspaceManager {
 		let display = "\n";
 
 		Object.entries(workspacesByType).forEach(([type, workspaces]) => {
-			const typeIcon = type === "app" ? "📱" : type === "package" ? "" : "🏠";
+			const typeIcon =
+				type === "app" ? "[APP]" : type === "package" ? "" : "[ROOT]";
 			display += pc.bold(pc.cyan(`${typeIcon} ${type.toUpperCase()}S:\n`));
 
 			workspaces.forEach((workspace) => {

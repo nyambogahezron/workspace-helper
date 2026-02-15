@@ -1,14 +1,14 @@
 import { relative } from "node:path";
 import { note } from "@clack/prompts";
 import pc from "picocolors";
-import type { WorkspaceInfo } from "./types";
+import type { WorkspaceInfo } from "../types";
 import { detectPackageManager, groupWorkspacesByLocation } from "./utils";
 
 export class UIHelpers {
 	constructor(private rootPath: string) {}
 
 	getTypeIcon(type: string): string {
-		return type === "app" ? "📱" : type === "package" ? "" : "🏠";
+		return type === "app" ? "[APP]" : type === "package" ? "" : "[ROOT]";
 	}
 
 	hasPackage(workspace: WorkspaceInfo, packageName: string): boolean {
@@ -37,7 +37,7 @@ export class UIHelpers {
 
 		groups.forEach(({ path }) => {
 			const relativePath = relative(this.rootPath, path);
-			instructions += pc.cyan(`📁 ${relativePath || "root"}:\n`);
+			instructions += pc.cyan(`[DIR] ${relativePath || "root"}:\n`);
 			instructions += pc.gray(`   cd ${relativePath || "."}\n`);
 			instructions += pc.green(`   ${installCommand}\n\n`);
 		});

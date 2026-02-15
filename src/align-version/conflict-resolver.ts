@@ -8,7 +8,7 @@ import {
 	text,
 } from "@clack/prompts";
 import pc from "picocolors";
-import type { WorkspaceInfo } from "./types";
+import type { WorkspaceInfo } from "../types";
 import { fetchLatestVersionSimple, isVersionNewer } from "./utils";
 
 export class ConflictResolver {
@@ -337,13 +337,13 @@ export class ConflictResolver {
 						{
 							value: latestVersion,
 							label: `${latestVersion} ${pc.green("(latest from npm)")} ${
-								isNewer ? pc.yellow("🆕") : ""
+								isNewer ? pc.yellow("[NEW]") : ""
 							}`,
 						},
 					]
 				: []),
 			{ value: "custom", label: " Enter custom version" },
-			{ value: "skip", label: "⏭️  Skip this package" },
+			{ value: "skip", label: " Skip this package" },
 		];
 
 		const targetVersion = await select({
