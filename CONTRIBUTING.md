@@ -1,4 +1,4 @@
-# Contributing to Workspace Version Aligner
+# Contributing to Workspace Helper
 
 Thank you for your interest in contributing! This project is a monorepo managed with [Bun](https://bun.sh) workspaces.
 
@@ -6,8 +6,8 @@ Thank you for your interest in contributing! This project is a monorepo managed 
 
 This repository is organized as a monorepo:
 
-- **`packages/version-aligner`**: The core CLI tool for aligning package versions.
-- **`packages/create-release`**: A helper package for release automation.
+- **`src/workspace-helper`**: The core CLI tool for aligning package versions.
+- **`src/create-release`**: A helper package for release automation.
 
 ## Prerequisites
 
@@ -19,8 +19,8 @@ This repository is organized as a monorepo:
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/nyambogahezron/workspace-version-aligner.git
-    cd workspace-version-aligner
+    git clone https://github.com/nyambogahezron/workspace-helper.git
+    cd workspace-helper
     ```
 
 2.  **Install dependencies:**
@@ -41,21 +41,16 @@ This repository is organized as a monorepo:
 
 ## Development Workflow
 
-### Working on the CLI (`version-aligner`)
+### Working on the CLI (`workspace-helper`)
 
-The source code for the main CLI tool is located in `packages/version-aligner`.
+The source code for the main CLI tool is located in `src/workspace-helper`.
 
--   **Modify Code**: Edit files in `packages/version-aligner/src`.
--   **Build**: Run `bun run build` in the root or `packages/version-aligner` folder.
+-   **Modify Code**: Edit files in `src/workspace-helper`.
+-   **Build**: Run `bun run build`.
 -   **Test Code**: You can run the CLI from the root using the convenience scripts:
 
-    ```bash
-    # Run the `wva` command
-    bun run wva
-
-    # Run the `align-versions` command
-    bun run align-versions
-    ```
+    # Run the `wh` command
+    bun run start
 
 ### Code Style
 

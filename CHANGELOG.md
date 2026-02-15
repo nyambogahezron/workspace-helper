@@ -2,6 +2,14 @@
 
 All notable changes to the "workspace-version-aligner-extension" extension will be documented in this file.
 
+## [1.0.3] - 2026-02-14
+
+### Changed
+
+- Updated documentation to match project (migrated from Husky)
+- Rewrote README.md with interactive CLI instructions
+- Updated .gitignore
+
 ## [1.0.0] - 2024-01-XX
 
 ### Added

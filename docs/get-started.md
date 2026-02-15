@@ -2,32 +2,32 @@
 
 ## Installation
 
-You can use `workspace-version-aligner` directly with `bun`, `npx` or install it globally.
+You can use `workspace-helper` directly with `bun`, `npx` or install it globally.
 
 ### Using Bun (Recommended)
 
 ```bash
-bun x workspace-version-aligner
+bun x workspace-helper
 ```
 
 ### Using npm/npx
 
 ```bash
-npx workspace-version-aligner
+npx workspace-helper
 ```
 
 ### Global Installation
 
 ```bash
-npm install -g workspace-version-aligner
+npm install -g workspace-helper
 # or
-bun add -g workspace-version-aligner
+bun add -g workspace-helper
 ```
 
 Then run:
 
 ```bash
-wva
+wh
 ```
 
 ## Usage
