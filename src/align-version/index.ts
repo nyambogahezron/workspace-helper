@@ -13,14 +13,15 @@ import {
 	spinner,
 } from "@clack/prompts";
 import pc from "picocolors";
+import type { WorkspaceInfo } from "../types";
+import printLogo from "../utils/logo";
 import { ConflictResolver } from "./conflict-resolver";
 import { PackageOperations } from "./package-operations";
-import type { WorkspaceInfo } from "./types";
 import { UIHelpers } from "./ui";
 import { detectPackageManager, groupWorkspacesByLocation } from "./utils";
 import { WorkspaceManager } from "./workspace-manager";
 
-class PackageUpdater {
+class AlignVersions {
 	private workspaceManager: WorkspaceManager;
 	private packageOps: PackageOperations;
 	private conflictResolver: ConflictResolver;
@@ -37,21 +38,14 @@ class PackageUpdater {
 
 	async init() {
 		console.clear();
+		printLogo();
 		intro(pc.bold(pc.cyan(" Package Updater")));
 
 		await this.workspaceManager.scanWorkspaces();
 		const workspaces = this.workspaceManager.getWorkspaces();
 
 		// Initialize other modules with workspace data and required dependencies
-		this.packageOps = new PackageOperations(
-			workspaces,
-			this.rootPath,
-			() => this.workspaceManager.displayWorkspaces(),
-			(type: string) => this.ui.getTypeIcon(type),
-			(workspace: WorkspaceInfo, packageName: string) =>
-				this.ui.hasPackage(workspace, packageName),
-			(targetWorkspaces: string[]) => this.installPackages(targetWorkspaces),
-		);
+		this.packageOps = new PackageOperations(workspaces);
 
 		this.conflictResolver = new ConflictResolver(
 			workspaces,
@@ -78,18 +72,12 @@ class PackageUpdater {
 			const action = await select({
 				message: "What would you like to do?",
 				options: [
-					{ value: "add", label: "Add or update package" },
-					{ value: "remove", label: "Remove package" },
 					{ value: "sync", label: "Sync package versions" },
 					{
 						value: "conflicts",
 						label: "Find and resolve version conflicts",
 					},
 					{ value: "list", label: "List all packages" },
-					{
-						value: "install",
-						label: "Install packages (run package manager)",
-					},
 				],
 			});
 
@@ -99,12 +87,6 @@ class PackageUpdater {
 			}
 
 			switch (action) {
-				case "add":
-					await this.packageOps.addOrUpdatePackage();
-					break;
-				case "remove":
-					await this.packageOps.removePackage();
-					break;
 				case "sync": {
 					const syncResult = await this.packageOps.syncPackageVersions();
 					if (syncResult) {
@@ -123,9 +105,6 @@ class PackageUpdater {
 				case "list":
 					await this.listPackages();
 					break;
-				case "install":
-					await this.showInstallPrompt();
-					break;
 			}
 		} catch (error) {
 			outro(pc.red(`An error occurred: ${(error as Error).message}`));
@@ -136,24 +115,6 @@ class PackageUpdater {
 	private async listPackages() {
 		const packageMap = this.workspaceManager.getAllPackages();
 		this.ui.displayPackageList(packageMap);
-	}
-
-	private async showInstallPrompt() {
-		this.workspaceManager.displayWorkspaces();
-
-		const confirmInstall = await confirm({
-			message:
-				"Install packages for all workspaces? (This will run the package manager)",
-			initialValue: true,
-		});
-
-		if (confirmInstall) {
-			const allWorkspaces = this.workspaceManager
-				.getWorkspaces()
-				.map((w) => w.path);
-			await this.installPackages(allWorkspaces);
-			outro(pc.green(" Package installation completed successfully!"));
-		}
 	}
 
 	private async executeSyncVersions(
@@ -213,11 +174,11 @@ class PackageUpdater {
 				}
 			}
 
-			s.stop(dryRun ? "👀 Preview completed" : "Sync completed");
+			s.stop(dryRun ? "[PREVIEW] Preview completed" : "Sync completed");
 
 			let changesDisplay = "\n";
 			changes.forEach((change) => {
-				changesDisplay += `🔄 ${change.workspace}: ${pc.dim(
+				changesDisplay += `[SYNC] ${change.workspace}: ${pc.dim(
 					String(change.before),
 				)} → ${pc.green(String(change.after))} ${pc.gray(
 					`(${change.type})`,
@@ -340,9 +301,4 @@ class PackageUpdater {
 	}
 }
 
-// Run the script
-const updater = new PackageUpdater();
-updater
-	.init()
-	.then(() => updater.run())
-	.catch(console.error);
+export default AlignVersions;
