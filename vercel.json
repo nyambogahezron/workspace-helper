@@ -1,5 +1,0 @@
-{
-	"buildCommand": "cd docs && bun install && bun run build",
-	"outputDirectory": "docs/.vitepress/dist",
-	"framework": "vitepress"
-}
