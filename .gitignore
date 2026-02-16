@@ -11,3 +11,5 @@ build/
 /test-results-*/
 /test-results-*/
 .release-temp/
+.vercel
+.env*.local

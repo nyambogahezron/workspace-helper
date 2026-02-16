@@ -16,7 +16,7 @@
 	"private": false,
 	"scripts": {
 		"build": "bun build ./src/index.ts --outdir ./dist --target=node --minify && tsc --emitDeclarationOnly --declaration",
-		"docs:build": "cd docs && npm install && npm run build",
+		"docs:build": "cd docs && bun install && bun run build",
 		"dev": "bun run ./src/index.ts",
 		"start": "bun run ./dist/index.js",
 		"format": "biome format --write .",
