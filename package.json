@@ -1,7 +1,7 @@
 {
 	"name": "workspace-helper",
-	"version": "1.0.3",
-	"private": true,
+	"version": "1.0.4-alpha",
+	"private": false,
 	"scripts": {
 		"build": "bun build ./src/index.ts --outdir ./dist --target=bun",
 		"start": "bun run ./src/index.ts",

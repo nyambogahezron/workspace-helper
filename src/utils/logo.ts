@@ -23,4 +23,3 @@ export default function printLogo() {
 	console.log(pc.dim(`v${version}`));
 	console.log("");
 }
-
