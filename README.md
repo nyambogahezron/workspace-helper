@@ -5,6 +5,8 @@ A tool for managing package versions across monorepo workspaces.
 [![npm version](https://img.shields.io/npm/v/workspace-helper.svg?label=version&message=1.0.3)](https://npmjs.org/package/workspace-helper)
 [![License](https://img.shields.io/npm/l/workspace-helper.svg)](https://github.com/nyambogahezron/workspace-helper/blob/main/LICENSE)
 
+[![Documentation](https://img.shields.io/badge/documentation-online-blue)](https://workspace-helper-sepia.vercel.app/)
+- [Documentation](https://workspace-helper-sepia.vercel.app/)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Interactive Commands](#interactive-commands)

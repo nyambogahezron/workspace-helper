@@ -12,7 +12,7 @@
 	"bugs": {
 		"url": "https://github.com/nyambogahezron/workspace-helper/issues"
 	},
-	"homepage": "https://github.com/nyambogahezron/workspace-helper#readme",
+	"homepage": "https://workspace-helper-sepia.vercel.app/",
 	"private": false,
 	"scripts": {
 		"build": "bun build ./src/index.ts --outdir ./dist --target=node --minify && tsc --emitDeclarationOnly --declaration",
