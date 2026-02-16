@@ -1,6 +1,6 @@
 {
 	"name": "workspace-helper",
-	"version": "1.0.4-alpha",
+	"version": "1.0.4-beta",
 	"description": "CLI tool to detect and fix mismatched dependency versions in monorepos",
 	"keywords": [
 		"monorepo",
