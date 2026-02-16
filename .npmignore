@@ -3,3 +3,6 @@ index.ts
 node_modules/
 tsconfig.json
 bun.lock 
+docs/
+
+!dist/
