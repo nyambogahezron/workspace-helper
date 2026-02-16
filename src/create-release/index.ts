@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { confirm, isCancel, select, text } from "@clack/prompts";
@@ -210,23 +210,34 @@ export default async function CreateRelease() {
 		}
 
 		console.log("Pushing changes...");
-		const packageFiles = allPackageJsons
-			.map((p) => path.relative(process.cwd(), p))
-			.join(" ");
+		const packageFiles = allPackageJsons.map((p) =>
+			path.relative(process.cwd(), p),
+		);
 
-		execSync(`git add ${packageFiles} CHANGELOG.md`, { stdio: "inherit" });
-		execSync(`git commit -m "chore(release): v${targetVersion}"`, {
+		execFileSync("git", ["add", ...packageFiles, "CHANGELOG.md"], {
 			stdio: "inherit",
 		});
-		execSync("git push", { stdio: "inherit" });
-		execSync(`git tag v${targetVersion}`, { stdio: "inherit" });
-		execSync(`git push origin v${targetVersion}`, {
+		execFileSync("git", ["commit", "-m", `chore(release): v${targetVersion}`], {
+			stdio: "inherit",
+		});
+		execFileSync("git", ["push"], { stdio: "inherit" });
+		execFileSync("git", ["tag", `v${targetVersion}`], { stdio: "inherit" });
+		execFileSync("git", ["push", "origin", `v${targetVersion}`], {
 			stdio: "inherit",
 		});
 
 		console.log("Creating GitHub Release...");
-		execSync(
-			`gh release create v${version || nextVersion} --title "v${version || nextVersion}" --notes-file ${releaseNotePath}`,
+		execFileSync(
+			"gh",
+			[
+				"release",
+				"create",
+				`v${version || nextVersion}`,
+				"--title",
+				`v${version || nextVersion}`,
+				"--notes-file",
+				releaseNotePath,
+			],
 			{ stdio: "inherit" },
 		);
 
@@ -237,7 +248,7 @@ export default async function CreateRelease() {
 
 	if (actions === "list") {
 		try {
-			const tagsOutput = execSync("git tag", { encoding: "utf-8" });
+			const tagsOutput = execFileSync("git", ["tag"], { encoding: "utf-8" });
 			const tags = tagsOutput
 				.split("\n")
 				.map((tag) => tag.trim())
