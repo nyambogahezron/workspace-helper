@@ -2,6 +2,14 @@
 
 All notable changes to the "workspace-version-aligner-extension" extension will be documented in this file.
 
+
+## [1.0.4-alpha] - 2026-02-16
+
+### Added
+
+- Support for alpha releases
+- NPM publishing capability
+
 ## [1.0.3] - 2026-02-14
 
 ### Changed
