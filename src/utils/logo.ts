@@ -20,6 +20,6 @@ $$  \\  /$$/______     $$ |__    ______   ______    ______
 export default function printLogo() {
 	const version = getVersion(packageJson.version);
 	console.log(pc.cyan(pc.bold(logo)));
-	console.log(pc.dim(`v${version}`));
+	console.log(pc.dim(`v${version.join(".")}`));
 	console.log("");
 }
