@@ -93,5 +93,6 @@ export async function detectPackageManager(): Promise<string> {
 	if (existsSync("pnpm-lock.yaml")) return "pnpm install";
 	if (existsSync("yarn.lock")) return "yarn install";
 	if (existsSync("bun.lockb")) return "bun install";
+	if (existsSync("bun.lock")) return "bun install";
 	return "npm install";
 }
