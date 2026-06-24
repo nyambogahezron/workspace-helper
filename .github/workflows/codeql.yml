@@ -1,4 +1,4 @@
-name: "CodeQL Advanced"
+name: "CodeQL Security Scan"
 
 on:
   push:
@@ -11,7 +11,6 @@ on:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    # Consider using larger runners or machines with greater resources for possible analysis time improvements.
     runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
     permissions:
       security-events: write
